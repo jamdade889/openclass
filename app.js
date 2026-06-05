@@ -123,6 +123,8 @@ window.addPlan = async () => {
         duration = 365;
     }
 
+    const id = planType;
+
     if (!id || !planType) {
         alert("Select Plan");
         return;
@@ -139,138 +141,11 @@ window.addPlan = async () => {
 };
 
 
-// =========================================
-// LOAD PLANS
-// =========================================
-
-async function loadPlans() {
-
-    const container =
-        document.getElementById('plans-list');
-
-    container.innerHTML = "";
-
-    const snap =
-        await getDocs(collection(db, "plans"));
-
-    snap.forEach((docSnap) => {
-
-        const data = docSnap.data();
-
-        container.innerHTML += `
-
-        <div class="border p-4 rounded-xl mb-3">
-
-            <h3 class="text-xl font-black">
-
-                ${data.name}
-
-            </h3>
-
-            <p>
-
-                Price: ₹${data.price}
-
-            </p>
-
-            <p>
-
-                Duration: ${data.duration} days
-
-            </p>
-
-        </div>
-        `;
-    });
-}
-
-
-// =========================================
-// LOAD PLANS
-// =========================================
-
-async function loadPlans() {
-
-    const container =
-        document.getElementById('plans-list');
-
-    container.innerHTML = "";
-
-    const snap =
-        await getDocs(collection(db, "plans"));
-
-    snap.forEach((docSnap) => {
-
-        const data = docSnap.data();
-
-        container.innerHTML += `
-
-        <div class="border p-4 rounded-xl mb-3">
-
-            <h3 class="text-xl font-black">
-
-                ${data.name}
-
-            </h3>
-
-            <p>
-
-                Price: ₹${data.price}
-
-            </p>
-
-            <p>
-
-                Duration: ${data.duration} days
-
-            </p>
-
-        </div>
-        `;
-    });
-}
-
 
 
 // =========================================
 // ADD INSTITUTE
 // =========================================
-
-function generateInstituteId() {
-
-    const name =
-        document.getElementById('institute-name').value.trim();
-
-    const logo =
-        document.getElementById('institute-logo').value.trim();
-
-    if (!name || !logo) {
-
-        document.getElementById('institute-id').value = "";
-        return;
-
-    }
-
-    const instituteId =
-        name
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '') +
-        "-" +
-        Date.now();
-
-    document.getElementById('institute-id').value =
-        instituteId;
-}
-
-document
-    .getElementById('institute-name')
-    .addEventListener('input', generateInstituteId);
-
-document
-    .getElementById('institute-logo')
-    .addEventListener('input', generateInstituteId);
 
 window.addInstitute = async () => {
 
@@ -286,6 +161,9 @@ window.addInstitute = async () => {
     const currentPlan =
         document.getElementById('institute-plan').value;
 
+    const ownerId =
+        auth.currentUser?.uid || "";
+
     if (!name || !logo || !currentPlan || !instituteId) {
 
         alert("Fill all fields");
@@ -293,24 +171,27 @@ window.addInstitute = async () => {
 
     }
 
-    await addDoc(collection(db, "institutes"), {
+    await setDoc(
+        doc(db, "institutes", instituteId),
+        {
 
-        instituteId,
-        name,
-        logo,
-        ownerId,
+            instituteId,
+            name,
+            logo,
+            ownerId,
 
-        createdAt: serverTimestamp(),
+            createdAt: serverTimestamp(),
 
-        currentPlan,
+            currentPlan,
 
-        subscriptionStatus: "active",
+            subscriptionStatus: "active",
 
-        expiryDate: new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000
-        )
+            expiryDate: new Date(
+                Date.now() + 30 * 24 * 60 * 60 * 1000
+            )
 
-    });
+        }
+    );
 
     alert("Institute Added");
 
@@ -321,99 +202,9 @@ window.addInstitute = async () => {
     loadInstitutes();
 };
 
-
 // =========================================
 // LOAD INSTITUTES
 // =========================================
-
-async function loadInstitutes() {
-
-    const container =
-        document.getElementById('institutes-list');
-
-    container.innerHTML = "";
-
-    const snap =
-        await getDocs(collection(db, "institutes"));
-
-    snap.forEach((docSnap) => {
-
-        const data = docSnap.data();
-
-        container.innerHTML += `
-
-        <div class="border p-4 rounded-xl mb-3">
-
-            <h3 class="text-xl font-black">
-
-                ${data.name}
-
-            </h3>
-
-            <p>
-
-                Plan: ${data.currentPlan}
-
-            </p>
-
-            <p>
-
-                Status: ${data.subscriptionStatus}
-
-            </p>
-
-        </div>
-        `;
-    });
-}
-
-
-
-
-// =========================================
-// LOAD INSTITUTES
-// =========================================
-
-async function loadInstitutes() {
-
-    const container =
-        document.getElementById('institutes-list');
-
-    container.innerHTML = "";
-
-    const snap =
-        await getDocs(collection(db, "institutes"));
-
-    snap.forEach((docSnap) => {
-
-        const data = docSnap.data();
-
-        container.innerHTML += `
-
-        <div class="border p-4 rounded-xl mb-3">
-
-            <h3 class="text-xl font-black">
-
-                ${data.name}
-
-            </h3>
-
-            <p>
-
-                Plan: ${data.currentPlan}
-
-            </p>
-
-            <p>
-
-                Status: ${data.subscriptionStatus}
-
-            </p>
-
-        </div>
-        `;
-    });
-}
 
 
 
