@@ -104,39 +104,85 @@ window.showSection = (sectionId) => {
 
 window.addPlan = async () => {
 
-    const id =
-        document.getElementById('plan-id').value;
-
-    const name =
-        document.getElementById('plan-name').value;
+    const planType =
+        document.getElementById('plan-type').value;
 
     const price =
         Number(document.getElementById('plan-price').value);
 
-    const duration =
-        Number(document.getElementById('plan-duration').value);
+    let name = "";
+    let duration = 0;
 
-    if (!id || !name) {
+    if (planType === "free") {
+        name = "Free Plan";
+        duration = 15;
+    }
 
-        alert("Fill all fields");
+    if (planType === "yearly") {
+        name = "Yearly Plan";
+        duration = 365;
+    }
 
+    if (!id || !planType) {
+        alert("Select Plan");
         return;
-
     }
 
     await setDoc(doc(db, "plans", id), {
-
         name,
         price,
         duration
-
     });
 
     alert("Plan Added");
-
     loadPlans();
-
 };
+
+
+// =========================================
+// LOAD PLANS
+// =========================================
+
+async function loadPlans() {
+
+    const container =
+        document.getElementById('plans-list');
+
+    container.innerHTML = "";
+
+    const snap =
+        await getDocs(collection(db, "plans"));
+
+    snap.forEach((docSnap) => {
+
+        const data = docSnap.data();
+
+        container.innerHTML += `
+
+        <div class="border p-4 rounded-xl mb-3">
+
+            <h3 class="text-xl font-black">
+
+                ${data.name}
+
+            </h3>
+
+            <p>
+
+                Price: ₹${data.price}
+
+            </p>
+
+            <p>
+
+                Duration: ${data.duration} days
+
+            </p>
+
+        </div>
+        `;
+    });
+}
 
 
 // =========================================
@@ -190,22 +236,66 @@ async function loadPlans() {
 // ADD INSTITUTE
 // =========================================
 
+function generateInstituteId() {
+
+    const name =
+        document.getElementById('institute-name').value.trim();
+
+    const logo =
+        document.getElementById('institute-logo').value.trim();
+
+    if (!name || !logo) {
+
+        document.getElementById('institute-id').value = "";
+        return;
+
+    }
+
+    const instituteId =
+        name
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '') +
+        "-" +
+        Date.now();
+
+    document.getElementById('institute-id').value =
+        instituteId;
+}
+
+document
+    .getElementById('institute-name')
+    .addEventListener('input', generateInstituteId);
+
+document
+    .getElementById('institute-logo')
+    .addEventListener('input', generateInstituteId);
+
 window.addInstitute = async () => {
 
     const name =
-        document.getElementById('institute-name').value;
+        document.getElementById('institute-name').value.trim();
 
     const logo =
-        document.getElementById('institute-logo').value;
+        document.getElementById('institute-logo').value.trim();
 
-    const ownerId =
-        document.getElementById('institute-owner').value;
+    const instituteId =
+        document.getElementById('institute-id').value;
 
     const currentPlan =
         document.getElementById('institute-plan').value;
 
+    if (!name || !logo || !currentPlan || !instituteId) {
+
+        alert("Fill all fields");
+        return;
+
+    }
+
     await addDoc(collection(db, "institutes"), {
 
+        instituteId,
         name,
         logo,
         ownerId,
@@ -224,9 +314,60 @@ window.addInstitute = async () => {
 
     alert("Institute Added");
 
-    loadInstitutes();
+    document.getElementById('institute-name').value = "";
+    document.getElementById('institute-logo').value = "";
+    document.getElementById('institute-id').value = "";
 
+    loadInstitutes();
 };
+
+
+// =========================================
+// LOAD INSTITUTES
+// =========================================
+
+async function loadInstitutes() {
+
+    const container =
+        document.getElementById('institutes-list');
+
+    container.innerHTML = "";
+
+    const snap =
+        await getDocs(collection(db, "institutes"));
+
+    snap.forEach((docSnap) => {
+
+        const data = docSnap.data();
+
+        container.innerHTML += `
+
+        <div class="border p-4 rounded-xl mb-3">
+
+            <h3 class="text-xl font-black">
+
+                ${data.name}
+
+            </h3>
+
+            <p>
+
+                Plan: ${data.currentPlan}
+
+            </p>
+
+            <p>
+
+                Status: ${data.subscriptionStatus}
+
+            </p>
+
+        </div>
+        `;
+    });
+}
+
+
 
 
 // =========================================
