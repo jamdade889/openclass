@@ -1758,6 +1758,25 @@
             setupPlayer(id, fallbackVid, { title, link: url, isLiveBroadcast: false }, url);
         };
 
+
+        // Example of fetching groups ONLY for the student's institute
+async function loadGroups() {
+    if (!profile || !profile.instituteId) return;
+
+    const groupsRef = collection(db, "groups");
+    // CRITICAL: Filter where instituteId matches the user's institute
+    const q = query(groupsRef, where("instituteId", "==", profile.instituteId));
+    
+    const snapshot = await getDocs(q);
+    const container = document.getElementById('groups-list');
+    container.innerHTML = '';
+    
+    snapshot.forEach(doc => {
+        const group = doc.data();
+        // Render only private institute data
+        renderGroupCard(group); 
+    });
+}
         window.openCourse = async (id) => {
             const snap = await Core.getDoc(Core.doc(Core.db, "courses", id));
             const c = snap.data();
