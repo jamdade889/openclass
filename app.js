@@ -88,6 +88,46 @@ export async function sendOTP(email, code) {
     return await emailjs.send(emailConfig.serviceID, emailConfig.templateID, { to_email: email, otp: code });
 }
 
+// Function to check if the Institute ID is valid
+async function verifyInstituteCode(code) {
+    // Check 'institutes' collection for a matching 'instituteCode'
+    const instRef = collection(db, "institutes");
+    const q = query(instRef, where("instituteCode", "==", code.trim().toUpperCase()));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+        showToast("Invalid Institute ID. Access Denied.");
+        return null;
+    }
+    return snapshot.docs[0].id; // Return the actual Institute Database ID
+}
+
+
+
+// Update finalizeProfile or handleAuth to include this check
+window.finalizeProfile = async () => {
+    const instCode = document.getElementById('ob-inst-id').value;
+    const role = document.getElementById('ob-role').value;
+    
+    const instituteDocId = await verifyInstituteCode(instCode);
+    
+    if (instituteDocId) {
+        // Proceed with profile creation and link the user to this institute
+        const userData = {
+            name: document.getElementById('ob-name').value,
+            role: role,
+            instituteId: instituteDocId, // Only students of this ID can enter
+            joinedAt: new Date()
+        };
+        // Save to Firebase 'users' collection
+        await setDoc(doc(db, "users", auth.currentUser.uid), userData);
+        showScreen('dashboard');
+    }
+};
+
+
+
+
 // =========================================
 // ADMIN PANEL CORE VARIABLES
 // =========================================
