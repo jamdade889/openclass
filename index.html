@@ -1692,6 +1692,16 @@
                 title: t, description: d, thumbnail: window.getSmartPreview(vu[0]), playlist, price: p, teacherId: profile.teacherId, teacherName: profile.name, groupId: gRef.id, createdAt: Core.serverTimestamp() 
             });
             toast("Course matrix active"); window.loadHome();
+            const q = query(
+   collection(db,"courses"),
+   where(
+      "instituteId",
+      "==",
+      profile.instituteId
+   )
+);
+
+const snap = await getDocs(q);
         };
 
         window.joinGroup = async () => {
