@@ -92,7 +92,7 @@ export async function sendOTP(email, code) {
 async function verifyInstituteCode(code) {
     // Check 'institutes' collection for a matching 'instituteCode'
     const instRef = collection(db, "institutes");
-    const q = query(instRef, where("instituteCode", "==", code.trim().toUpperCase()));
+    const q = query(instRef, where("uniqueId", "==", code.trim().toUpperCase()));
     const snapshot = await getDocs(q);
     
     if (snapshot.empty) {
