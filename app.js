@@ -269,17 +269,27 @@ window.processInstituteSave = async () => {
     const uniqueId = "INST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
     try {
-        await addDoc(collection(db, "institutes"), {
-            uniqueId, 
-            teacherId, 
-            name, 
-            logo, 
-            privacyMode: privacy,
-            planStart: start, 
-            planEnd: end, 
-            status: 'active',
-            createdAt: serverTimestamp()
-        });
+       await addDoc(collection(db, "institutes"), {
+    uniqueId,
+    teacherId,
+
+    ownerUid: teacherId,
+
+    name,
+    logo,
+
+    privacyMode: privacy,
+
+    planStart: start,
+    planEnd: end,
+
+    studentCount: 0,
+    teacherCount: 1,
+
+    status: "active",
+
+    createdAt: serverTimestamp()
+});
 
         alert(`Institute Node Registered!\nUnique Access ID: ${uniqueId}`);
         
@@ -334,23 +344,6 @@ window.loadInstitutes = async () => {
 
 
 
-
-
-// // Function to check if the Institute ID is valid
-// async function verifyInstituteCode(code) {
-//     // Check 'institutes' collection for a matching 'instituteCode'
-//     const instRef = collection(db, "institutes");
-//     const q = query(instRef, where("instituteCode", "==", code.trim().toUpperCase()));
-//     const snapshot = await getDocs(q);
-    
-//     if (snapshot.empty) {
-//         showToast("Invalid Institute ID. Access Denied.");
-//         return null;
-//     }
-//     return snapshot.docs[0].id; // Return the actual Institute Database ID
-// }
-
-// Update finalizeProfile or handleAuth to include this check
 window.finalizeProfile = async () => {
     const instCode = document.getElementById('ob-inst-id').value;
     const role = document.getElementById('ob-role').value;
@@ -359,12 +352,40 @@ window.finalizeProfile = async () => {
     
     if (instituteDocId) {
         // Proceed with profile creation and link the user to this institute
-        const userData = {
-            name: document.getElementById('ob-name').value,
-            role: role,
-            instituteId: instituteDocId, // Only students of this ID can enter
-            joinedAt: new Date()
-        };
+       const instituteSnap =
+await getDoc(
+   doc(
+      db,
+      "institutes",
+      instituteDocId
+   )
+);
+
+const institute =
+   instituteSnap.data();
+
+const userData = {
+
+   uid:
+      auth.currentUser.uid,
+
+   name:
+      document.getElementById("ob-name").value,
+
+   role,
+
+   instituteId:
+      instituteDocId,
+
+   instituteCode:
+      institute.uniqueId,
+
+   instituteName:
+      institute.name,
+
+   joinedAt:
+      serverTimestamp()
+};
         // Save to Firebase 'users' collection
         await setDoc(doc(db, "users", auth.currentUser.uid), userData);
         showScreen('dashboard');
