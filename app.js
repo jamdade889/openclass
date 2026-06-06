@@ -35,10 +35,7 @@ import { firebaseConfig, emailConfig } from "./config.js";
 // =========================================
 // INITIALIZATION
 // =========================================
-const secureQuery = Core.query(
-    Core.collection(Core.db, "groups"),
-    Core.where("instituteId", "==", profile.instituteId) // <-- Ab Core.where bilkul perfect chalega!
-);
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
