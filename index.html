@@ -2106,57 +2106,57 @@
         if (localStorage.getItem('oc_theme') === 'true') document.documentElement.classList.add('light');
 
 
-async function loadGroups() {
-    const container = document.getElementById('student-groups'); 
-    if (!container) return;
+// async function loadGroups() {
+//     const container = document.getElementById('student-groups'); 
+//     if (!container) return;
     
-    // Security Check: Jar student kade instituteId nasel tar pudhe jau deu naka
-    if (!profile || !profile.instituteId) {
-        container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs font-bold uppercase">Access Denied: No Institute Code Linked</div>`;
-        return;
-    }
+//     // Security Check: Jar student kade instituteId nasel tar pudhe jau deu naka
+//     if (!profile || !profile.instituteId) {
+//         container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs font-bold uppercase">Access Denied: No Institute Code Linked</div>`;
+//         return;
+//     }
 
-    injectSkeletonState('student-groups');
+//     injectSkeletonState('student-groups');
 
-    try {
-        // FIRESTORE QUERY FILTER: Fakt ya student chya instituteId ches groups database madhun aanle jatil
-        const secureQuery = Core.query(
-            Core.collection(Core.db, "groups"),
-            Core.where("instituteId", "==", profile.instituteId)
-        );
+//     try {
+//         // FIRESTORE QUERY FILTER: Fakt ya student chya instituteId ches groups database madhun aanle jatil
+//         const secureQuery = Core.query(
+//             Core.collection(Core.db, "groups"),
+//             Core.where("instituteId", "==", profile.instituteId)
+//         );
         
-        const snap = await Core.getDocs(secureQuery);
+//         const snap = await Core.getDocs(secureQuery);
         
-        container.innerHTML = snap.docs.filter(d => 
-            d.data().members?.includes(Core.auth.currentUser.uid) || 
-            (profile.teacherId && d.data().teacherId === profile.teacherId)
-        ).map(docSnap => {
-            const g = docSnap.data();
-            const unreadCount = groupMessageTrackers[docSnap.id] || 0;
-            return `<div class="glass p-5 md:p-6 rounded-[2rem] flex justify-between items-center border border-[var(--border-color)] shadow-sm hover:shadow-brandOrange/20 hover:border-brandOrange/30 transition-all hover:scale-[1.01] group fade-in">
-                <div>
-                    <span class="text-[8px] text-brandOrange font-black uppercase tracking-widest shadow-[0_0_8px_rgba(247,148,29,0.2)]">${g.type}</span>
-                    <div class="flex items-center gap-3 mt-0.5">
-                        <h3 class="text-xl md:text-2xl font-black truncate max-w-[180px] md:max-w-xs text-[var(--text-main)] drop-shadow-sm group-hover:text-brandOrange transition-colors">${g.name}</h3>
-                        <span id="badge-${docSnap.id}" class="${unreadCount===0?'hidden':''} bg-brandOrange text-white text-[9px] font-extrabold px-2 py-0.5 rounded-lg shadow-md animate-bounce border border-white/10">${unreadCount} new</span>
-                    </div>
-                    <p class="text-[10px] opacity-40 font-mono mt-1">${g.code}</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="openGroupChat('${docSnap.id}', '${g.name}')" class="btn-brand px-5 md:px-7 py-3 text-[10px] shadow-md hover:shadow-brandOrange/30 hover:scale-110">Open Sync Hub</button>
-                </div>
-            </div>`;
-        }).join('');
+//         container.innerHTML = snap.docs.filter(d => 
+//             d.data().members?.includes(Core.auth.currentUser.uid) || 
+//             (profile.teacherId && d.data().teacherId === profile.teacherId)
+//         ).map(docSnap => {
+//             const g = docSnap.data();
+//             const unreadCount = groupMessageTrackers[docSnap.id] || 0;
+//             return `<div class="glass p-5 md:p-6 rounded-[2rem] flex justify-between items-center border border-[var(--border-color)] shadow-sm hover:shadow-brandOrange/20 hover:border-brandOrange/30 transition-all hover:scale-[1.01] group fade-in">
+//                 <div>
+//                     <span class="text-[8px] text-brandOrange font-black uppercase tracking-widest shadow-[0_0_8px_rgba(247,148,29,0.2)]">${g.type}</span>
+//                     <div class="flex items-center gap-3 mt-0.5">
+//                         <h3 class="text-xl md:text-2xl font-black truncate max-w-[180px] md:max-w-xs text-[var(--text-main)] drop-shadow-sm group-hover:text-brandOrange transition-colors">${g.name}</h3>
+//                         <span id="badge-${docSnap.id}" class="${unreadCount===0?'hidden':''} bg-brandOrange text-white text-[9px] font-extrabold px-2 py-0.5 rounded-lg shadow-md animate-bounce border border-white/10">${unreadCount} new</span>
+//                     </div>
+//                     <p class="text-[10px] opacity-40 font-mono mt-1">${g.code}</p>
+//                 </div>
+//                 <div class="flex gap-2">
+//                     <button onclick="openGroupChat('${docSnap.id}', '${g.name}')" class="btn-brand px-5 md:px-7 py-3 text-[10px] shadow-md hover:shadow-brandOrange/30 hover:scale-110">Open Sync Hub</button>
+//                 </div>
+//             </div>`;
+//         }).join('');
 
-        if (container.innerHTML === '') {
-            container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs uppercase font-bold">No Workspace Hubs Found For Your Institute</div>`;
-        }
+//         if (container.innerHTML === '') {
+//             container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs uppercase font-bold">No Workspace Hubs Found For Your Institute</div>`;
+//         }
 
-    } catch (error) {
-        console.error("Error loading secure groups:", error);
-        container.innerHTML = `<div class="p-8 text-center text-red-500 text-xs uppercase font-bold">Failed to load secure data stream</div>`;
-    }
-}
+//     } catch (error) {
+//         console.error("Error loading secure groups:", error);
+//         container.innerHTML = `<div class="p-8 text-center text-red-500 text-xs uppercase font-bold">Failed to load secure data stream</div>`;
+//     }
+// }
 
 
 
