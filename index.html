@@ -2092,16 +2092,16 @@ async function loadGroups() {
     const container = document.getElementById('student-groups'); 
     if (!container) return;
     
-    // Security Check: Jar student kade instituteId nasel tar pudhe jau deu naka
+    // Check user state logic
     if (!profile || !profile.instituteId) {
-        container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs font-bold uppercase">Access Denied: No Institute Code Linked</div>`;
+        container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs font-bold uppercase tracking-wider">Access Denied: No Institute Token Found</div>`;
         return;
     }
 
     injectSkeletonState('student-groups');
 
     try {
-        // FIRESTORE QUERY FILTER: Fakt ya student chya instituteId ches groups database madhun aanle jatil
+        // SECURE QUERY: Fakt tumchya institute code cha data load hoil
         const secureQuery = Core.query(
             Core.collection(Core.db, "groups"),
             Core.where("instituteId", "==", profile.instituteId)
@@ -2109,41 +2109,39 @@ async function loadGroups() {
         
         const snap = await Core.getDocs(secureQuery);
         
-        container.innerHTML = snap.docs.filter(d => 
-            d.data().members?.includes(Core.auth.currentUser.uid) || 
-            (profile.teacherId && d.data().teacherId === profile.teacherId)
-        ).map(docSnap => {
+        // Render block mapping context rules
+        container.innerHTML = snap.docs.filter(d => {
+            const data = d.data();
+            return data.members?.includes(Core.auth.currentUser.uid) || (profile.teacherId && data.teacherId === profile.teacherId);
+        }).map(docSnap => {
             const g = docSnap.data();
-            const unreadCount = groupMessageTrackers[docSnap.id] || 0;
-            return `<div class="glass p-5 md:p-6 rounded-[2rem] flex justify-between items-center border border-[var(--border-color)] shadow-sm hover:shadow-brandOrange/20 hover:border-brandOrange/30 transition-all hover:scale-[1.01] group fade-in">
+            // Fallback tracker configuration
+            const unreadCount = (typeof groupMessageTrackers !== 'undefined' && groupMessageTrackers[docSnap.id]) || 0;
+            
+            return `<div class="glass p-5 md:p-6 rounded-[2rem] flex justify-between items-center border border-[var(--border-color)] shadow-sm hover:shadow-brandBlue/30 hover:border-brandBlue/30 transition-all hover:scale-[1.01] group fade-in">
                 <div>
-                    <span class="text-[8px] text-brandOrange font-black uppercase tracking-widest shadow-[0_0_8px_rgba(247,148,29,0.2)]">${g.type}</span>
+                    <span class="text-[8px] text-brandBlue font-black uppercase tracking-widest">${g.type || "Private Node"}</span>
                     <div class="flex items-center gap-3 mt-0.5">
-                        <h3 class="text-xl md:text-2xl font-black truncate max-w-[180px] md:max-w-xs text-[var(--text-main)] drop-shadow-sm group-hover:text-brandOrange transition-colors">${g.name}</h3>
-                        <span id="badge-${docSnap.id}" class="${unreadCount===0?'hidden':''} bg-brandOrange text-white text-[9px] font-extrabold px-2 py-0.5 rounded-lg shadow-md animate-bounce border border-white/10">${unreadCount} new</span>
+                        <h3 class="text-xl md:text-2xl font-black truncate max-w-[150px] md:max-w-xs text-[var(--text-main)] drop-shadow-sm group-hover:text-brandBlue transition-colors">${g.name}</h3>
+                        <span id="badge-${docSnap.id}" class="${unreadCount === 0 ? 'hidden' : ''} bg-brandBlue text-white text-[9px] font-extrabold px-2 py-0.5 rounded-lg shadow-md border border-white/10">${unreadCount}</span>
                     </div>
-                    <p class="text-[10px] opacity-40 font-mono mt-1">${g.code}</p>
+                    <p class="text-[10px] opacity-40 font-mono mt-1">${g.code || "SECURE"}</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openGroupChat('${docSnap.id}', '${g.name}')" class="btn-brand px-5 md:px-7 py-3 text-[10px] shadow-md hover:shadow-brandOrange/30 hover:scale-110">Open Sync Hub</button>
+                    <button onclick="openGroupChat('${docSnap.id}', '${g.name}')" class="btn-brand px-5 md:px-6 py-3 text-[10px] shadow-md hover:shadow-brandBlue/30 hover:scale-105">Manage Pool</button>
+                    <button onclick="delG('${docSnap.id}')" class="bg-red-500/10 text-red-500 p-3 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-500/20 text-xs">✕</button>
                 </div>
             </div>`;
         }).join('');
 
         if (container.innerHTML === '') {
-            container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs uppercase font-bold">No Workspace Hubs Found For Your Institute</div>`;
+            container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs font-bold uppercase">No Active Workspace Groups For Your Institute ID</div>`;
         }
-
-    } catch (error) {
-        console.error("Error loading secure groups:", error);
-        container.innerHTML = `<div class="p-8 text-center text-red-500 text-xs uppercase font-bold">Failed to load secure data stream</div>`;
+    } catch (err) {
+        console.error("Secure query loading failed:", err);
+        container.innerHTML = `<div class="p-8 text-center text-red-500 text-xs font-bold uppercase">Error loading secure data stream</div>`;
     }
 }
-
-
-
-
-
 
 
 
