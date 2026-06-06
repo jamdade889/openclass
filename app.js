@@ -296,19 +296,19 @@ window.loadInstitutes = async () => {
 
 
 
-// Function to check if the Institute ID is valid
-async function verifyInstituteCode(code) {
-    // Check 'institutes' collection for a matching 'instituteCode'
-    const instRef = collection(db, "institutes");
-    const q = query(instRef, where("instituteCode", "==", code.trim().toUpperCase()));
-    const snapshot = await getDocs(q);
+// // Function to check if the Institute ID is valid
+// async function verifyInstituteCode(code) {
+//     // Check 'institutes' collection for a matching 'instituteCode'
+//     const instRef = collection(db, "institutes");
+//     const q = query(instRef, where("instituteCode", "==", code.trim().toUpperCase()));
+//     const snapshot = await getDocs(q);
     
-    if (snapshot.empty) {
-        showToast("Invalid Institute ID. Access Denied.");
-        return null;
-    }
-    return snapshot.docs[0].id; // Return the actual Institute Database ID
-}
+//     if (snapshot.empty) {
+//         showToast("Invalid Institute ID. Access Denied.");
+//         return null;
+//     }
+//     return snapshot.docs[0].id; // Return the actual Institute Database ID
+// }
 
 // Update finalizeProfile or handleAuth to include this check
 window.finalizeProfile = async () => {
