@@ -270,21 +270,6 @@
         </div>
     </div>
 
-    <!-- <div id="onboarding-screen" class="hidden min-h-screen flex items-center justify-center p-6 relative fade-in">
-        <button onclick="logout()" class="absolute top-10 right-10 text-2xl font-black opacity-30 hover:opacity-100 bg-[var(--border-color)] w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110 text-[var(--text-main)]">✕</button>
-        <div class="w-full max-w-md glass p-10 rounded-[3.5rem] border border-brandOrange/20 shadow-2xl text-center">
-            <h2 class="text-3xl font-black mb-6 italic">Finalize Profile</h2>
-            <div class="space-y-4">
-                <input type="text" id="ob-name" placeholder="Full Name" class="input-field">
-                <select id="ob-role" class="input-field">
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                </select>
-                <input type="password" id="ob-pass" placeholder="Secure Password" class="input-field">
-                <button onclick="finalizeProfile()" class="w-full py-5 btn-brand shadow-xl">Activate Account</button>
-            </div>
-        </div>
-    </div> -->
 
     <div id="signup-fields" class="hidden space-y-4 mb-4">
     <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
@@ -2120,11 +2105,12 @@
         function toast(m, type = "s") { const b = document.getElementById('toast-box'), d = document.createElement('div'); d.className = 'toast-pill'; if (type === "error") d.style.borderColor = "#ff4444"; d.innerText = m; b.appendChild(d); setTimeout(() => d.remove(), 2500); }
         if (localStorage.getItem('oc_theme') === 'true') document.documentElement.classList.add('light');
 
-     async function loadGroups() {
+
+async function loadGroups() {
     const container = document.getElementById('student-groups'); 
     if (!container) return;
     
-    // 1. Pehle check karein ki user ka profile aur instituteId available hai ya nahi
+    // Security Check: Jar student kade instituteId nasel tar pudhe jau deu naka
     if (!profile || !profile.instituteId) {
         container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs font-bold uppercase">Access Denied: No Institute Code Linked</div>`;
         return;
@@ -2133,7 +2119,7 @@
     injectSkeletonState('student-groups');
 
     try {
-        // 2. Query ke andar hi 'instituteId' ka security filter apply kiya
+        // FIRESTORE QUERY FILTER: Fakt ya student chya instituteId ches groups database madhun aanle jatil
         const secureQuery = Core.query(
             Core.collection(Core.db, "groups"),
             Core.where("instituteId", "==", profile.instituteId)
@@ -2141,7 +2127,6 @@
         
         const snap = await Core.getDocs(secureQuery);
         
-        // 3. Purana members aur teacherId ka logic maintain rakha, jo ab sirf is institute ke andar chalega
         container.innerHTML = snap.docs.filter(d => 
             d.data().members?.includes(Core.auth.currentUser.uid) || 
             (profile.teacherId && d.data().teacherId === profile.teacherId)
@@ -2164,7 +2149,7 @@
         }).join('');
 
         if (container.innerHTML === '') {
-            container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs uppercase font-bold">No Workspace Hubs Found</div>`;
+            container.innerHTML = `<div class="p-8 text-center opacity-40 text-xs uppercase font-bold">No Workspace Hubs Found For Your Institute</div>`;
         }
 
     } catch (error) {
@@ -2173,6 +2158,17 @@
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+        
         function renderGroups(docs, isT) {
             const container = document.getElementById('student-groups') || document.getElementById('tab-display'); if(!container) return;
             container.innerHTML = `<div class="space-y-4">${docs.map(d => {
